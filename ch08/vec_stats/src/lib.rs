@@ -57,7 +57,7 @@ fn mean(v: Vec<i32>) -> f64 {
     }
 }
 
-fn median<'a>(v: &mut Vec<i32>) -> Option<i32> {
+fn median(v: &mut Vec<i32>) -> Option<i32> {
     v.sort();
     match v.len() == 0 {
         true => None,
