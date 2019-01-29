@@ -7,22 +7,6 @@ mod test {
     use super::*;
 
     #[test]
-    fn parse_two_arguments() {
-        let result = Config::new(&[
-            String::from("app"),
-            String::from("hello"),
-            String::from("file.txt"),
-        ]);
-        assert_eq!(
-            result.unwrap(),
-            Config {
-                query: String::from("hello"),
-                filename: String::from("file.txt")
-            }
-        );
-    }
-
-    #[test]
     fn search_one_result() {
         let query = "duct";
         let content = "\
@@ -41,13 +25,18 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(args: &[String]) -> Result<Config, &'static str> {
-        if args.len() < 3 {
-            return Err("wrong number of arguments");
-        }
+    pub fn new(mut args: std::env::Args) -> Result<Config, &'static str> {
+        args.next();
 
-        let query = args[1].clone();
-        let filename = args[2].clone();
+        let query = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Missing query string"),
+        };
+
+        let filename = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Missing file name"),
+        };
 
         Ok(Config { query, filename })
     }
