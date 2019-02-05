@@ -88,22 +88,40 @@ mod tests {
         }
         assert_eq!(2, Rc::strong_count(&a));
     }
-    /*
+    
     #[test]
     fn ref_cons_works() {
         let value = Rc::new(RefCell::new(5));
         
         let a = Rc::new(RefCons(Rc::clone(&value), Rc::new(RefEmpty)));
-        let b = Rc::new(RefCons(Rc::new(6), Rc::clone(&a));
-        let c = Rc::new(RefCons(Rc::new(7), Rc::clone(&a));
+        
+        assert_eq!(
+            a,
+            Rc::new(RefCons(Rc::new(RefCell::new(5)), Rc::new(RefEmpty)))
+        );
+        
+        let b = Rc::new(RefCons(Rc::new(RefCell::new(6)), Rc::clone(&a)));
+        let c = Rc::new(RefCons(Rc::new(RefCell::new(7)), Rc::clone(&a)));
         
         *value.borrow_mut() *= 10;
         
         assert_eq!(
             a,
-            Rc::new(RefCons(Rc::new(50), Rc::new(RefEmpty)))
-        )
-    }*/
+            Rc::new(RefCons(Rc::new(RefCell::new(50)), Rc::new(RefEmpty)))
+        );
+        
+        assert_eq!(
+            b,
+            Rc::new(RefCons(Rc::new(RefCell::new(6)),
+                Rc::new(RefCons(Rc::new(RefCell::new(50)), Rc::new(RefEmpty)))))
+        );
+        
+        assert_eq!(
+            c,
+            Rc::new(RefCons(Rc::new(RefCell::new(7)),
+                Rc::new(RefCons(Rc::new(RefCell::new(50)), Rc::new(RefEmpty)))))
+        );
+    }
 }
 
 #[derive(Debug, PartialEq)]
