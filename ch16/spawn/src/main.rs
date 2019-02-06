@@ -2,17 +2,11 @@ use std::thread;
 use std::time::Duration;
 
 fn main() {
-    let handle = thread::spawn(|| {
-        for i in 1..10 {
-            println!("thread: number={}", i);
-            thread::sleep(Duration::from_millis(1));
-        }
-    });
+    let message = String::from("the secret word is move");
     
-    for i in 1..5 {
-        println!("main: number={}", i);
-        thread::sleep(Duration::from_millis(1));
-    }
+    let handle = thread::spawn(move || {
+        println!("thread: message={}", message);
+    });
     
     handle.join().unwrap();
 }
