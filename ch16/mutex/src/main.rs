@@ -2,15 +2,17 @@ use std::sync::{Mutex, Arc};
 use std::thread;
 
 fn main() {
-    let counter = Arc::new(Mutex::new(0));
+    let factorial = Arc::new(Mutex::new(1));
+    let value = 10;
     let mut handles = vec![];
     
-    for _ in 0..10 {
-        let counter = Arc::clone(&counter);
+    for i in 1..(value + 1) {
+        let factorial = Arc::clone(&factorial);
         let handle = thread::spawn(move || {
-            let mut num = counter.lock().unwrap();
+            let mut val = factorial.lock().unwrap();
             
-            *num += 1;
+            *val *= i;
+            println!("{}: {}*{}", i, *val, i);
         });
         handles.push(handle);
     }
@@ -19,5 +21,5 @@ fn main() {
         handle.join().unwrap();
     }
     
-    println!("Result: {:?}", *counter.lock().unwrap());
+    println!("\nResult: {} factorial = {}", value, *factorial.lock().unwrap());
 }
