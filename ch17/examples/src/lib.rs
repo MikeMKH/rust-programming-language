@@ -25,6 +25,20 @@ mod tests {
         
         assert_eq!(item.unwrap(), 1);
     }
+    
+    #[test]
+    fn happy_path_blog_post() {
+        let mut post = Post::new();
+        
+        post.add_text("I ate salad for dinner last night.");
+        assert_eq!("", post.content());
+        
+        post.request_review();
+        assert_eq!("", post.content());
+        
+        post.approve();
+        assert_eq!("I ate salad for dinner last night.", post.content());
+    }
 }
 
 pub struct AveragedCollection {
@@ -55,5 +69,88 @@ impl AveragedCollection {
     fn update_average(&mut self) {
         let total: i32 = self.list.iter().sum();
         self.average = total as f64 / self.list.len() as f64;
+    }
+}
+
+pub struct Post {
+    state: Option<Box<State>>,
+    content: String,
+}
+
+impl Post {
+    pub fn new() -> Post {
+        Post {
+            state: Some(Box::new(Draft {})),
+            content: String::new(),
+        }
+    }
+    
+    pub fn add_text(&mut self, text: &str) {
+        self.content.push_str(text);
+    }
+    
+    pub fn content(&self) -> &str {
+        self.state.as_ref().unwrap().content(&self)
+    }
+    
+    pub fn request_review(&mut self) {
+        if let Some(s) = self.state.take() {
+            self.state = Some(s.request_review())
+        }
+    }
+    
+    pub fn approve(&mut self) {
+        if let Some(s) = self.state.take() {
+            self.state = Some(s.approve())
+        }
+    }
+}
+
+trait State {
+    fn request_review(self: Box<Self>) -> Box<State>;
+    fn approve(self: Box<Self>) -> Box<State>;
+    
+    fn content<'a>(&self, post: &'a Post) -> &'a str {
+        ""
+    }
+}
+
+struct Draft {}
+
+impl State for Draft {
+    fn request_review(self: Box<Self>) -> Box<State> {
+        Box::new(PendingReview {})
+    }
+    
+    fn approve(self: Box<Self>) -> Box<State> {
+        self
+    }
+}
+
+struct PendingReview {}
+
+impl State for PendingReview {
+    fn request_review(self: Box<Self>) -> Box<State> {
+        self
+    }
+    
+    fn approve(self: Box<Self>) -> Box<State> {
+        Box::new(Publish {})
+    }
+}
+
+struct Publish {}
+
+impl State for Publish {
+    fn request_review(self: Box<Self>) -> Box<State> {
+        self
+    }
+    
+    fn approve(self: Box<Self>) -> Box<State> {
+        self
+    }
+    
+    fn content<'a>(&self, post: &'a Post) -> &'a str {
+        &post.content
     }
 }
