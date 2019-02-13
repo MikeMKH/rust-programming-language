@@ -30,6 +30,22 @@ mod tests {
     fn happy_path_blog_post() {
         let mut post = Post::new();
 
+        post.add_text("I ate breakfast for dinner last night.");
+        let post = post.request_review();
+        let post = post.approve();
+
+        assert_eq!("I ate breakfast for dinner last night.", post.content());
+    }
+
+    #[test]
+    fn rejected_blog_post() {
+        // hidden vegetarian propaganda :)
+        let mut post = Post::new();
+
+        post.add_text("I ate an animal for dinner last night.");
+        let post = post.request_review();
+        let mut post = post.reject();
+        
         post.add_text("I ate salad for dinner last night.");
         let post = post.request_review();
         let post = post.approve();
@@ -109,6 +125,12 @@ impl PendingReviewPost {
     fn approve(self) -> Post {
         Post {
             content: self.content,
+        }
+    }
+    
+    fn reject(self) -> DraftPost {
+        DraftPost {
+            content: String::new(),
         }
     }
 }
