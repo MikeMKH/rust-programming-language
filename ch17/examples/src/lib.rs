@@ -32,7 +32,8 @@ mod tests {
 
         post.add_text("I ate breakfast for dinner last night.");
         let post = post.request_review();
-        let post = post.approve();
+        let mut post = post.approve();
+        let mut post = post.approve();
 
         assert_eq!("I ate breakfast for dinner last night.", post.content());
     }
@@ -45,12 +46,30 @@ mod tests {
         post.add_text("I ate an animal for dinner last night.");
         let post = post.request_review();
         let mut post = post.reject();
-        
+
         post.add_text("I ate salad for dinner last night.");
         let post = post.request_review();
         let post = post.approve();
+        let post = post.approve();
 
         assert_eq!("I ate salad for dinner last night.", post.content());
+    }
+
+    #[test]
+    fn rejected_before_final_approved_blog_post() {
+        let mut post = Post::new();
+
+        post.add_text("I ate ice cream for dinner last night.");
+        let post = post.request_review();
+        let post = post.approve();
+        let mut post = post.reject();
+
+        post.add_text("I ate custard for dinner last night.");
+        let post = post.request_review();
+        let post = post.approve();
+        let post = post.approve();
+
+        assert_eq!("I ate custard for dinner last night.", post.content());
     }
 }
 
@@ -122,12 +141,30 @@ pub struct PendingReviewPost {
 }
 
 impl PendingReviewPost {
+    fn approve(self) -> PendingFinalReviewPost {
+        PendingFinalReviewPost {
+            content: self.content,
+        }
+    }
+
+    fn reject(self) -> DraftPost {
+        DraftPost {
+            content: String::new(),
+        }
+    }
+}
+
+pub struct PendingFinalReviewPost {
+    content: String,
+}
+
+impl PendingFinalReviewPost {
     fn approve(self) -> Post {
         Post {
             content: self.content,
         }
     }
-    
+
     fn reject(self) -> DraftPost {
         DraftPost {
             content: String::new(),
