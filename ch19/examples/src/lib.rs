@@ -39,6 +39,22 @@ mod tests {
         assert_eq!(*ys, [4, 5, 6]);
     }
 
+    #[test]
+    fn lifetime_subtyping() {
+        let str = String::from("Hello lifetime");
+        let ctx = Context(&str);
+
+        let result = parse_context(ctx);
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn inference_trait_lifetime() {
+        let name = String::from("Jack");
+
+        let jack = Box::new(Dog { name: &name }) as Box<dyn Terrier>;
+    }
 }
 
 use std::slice;
@@ -55,3 +71,27 @@ fn split(slice: &mut [i32], mid: usize) -> (&mut [i32], &mut [i32]) {
         )
     }
 }
+
+struct Context<'s>(&'s str);
+
+struct Parser<'c, 's: 'c> {
+    context: &'c Context<'s>,
+}
+
+impl<'c, 's> Parser<'c, 's> {
+    fn parse(&self) -> Result<(), &'s str> {
+        Err(&self.context.0[1..])
+    }
+}
+
+fn parse_context(context: Context) -> Result<(), &str> {
+    Parser { context: &context }.parse()
+}
+
+trait Terrier {}
+
+struct Dog<'a> {
+    name: &'a str,
+}
+
+impl<'a> Terrier for Dog<'a> {}
