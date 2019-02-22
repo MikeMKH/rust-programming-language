@@ -55,6 +55,15 @@ mod tests {
 
         let jack = Box::new(Dog { name: &name }) as Box<dyn Terrier>;
     }
+    
+    #[test]
+    fn placeholder_types() {
+        let counter = Counter::new();
+        
+        let result: u32 = counter.sum();
+        
+        assert_eq!((11 * 10) / 2, result);
+    }
 }
 
 use std::slice;
@@ -95,3 +104,28 @@ struct Dog<'a> {
 }
 
 impl<'a> Terrier for Dog<'a> {}
+
+#[derive(PartialEq, Debug)]
+struct Counter {
+    count: u32,
+}
+
+impl Counter {
+    fn new() -> Counter {
+        Counter { count: 0 }
+    }
+}
+
+impl Iterator for Counter {
+     type Item = u32;
+     
+     fn next(&mut self) -> Option<Self::Item> {
+         match self.count {
+             0 ... 9 => {
+                 self.count += 1;
+                 Some(self.count)
+             },
+             _ => None
+         }
+     }
+}
