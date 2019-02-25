@@ -53,16 +53,26 @@ mod tests {
     fn inference_trait_lifetime() {
         let name = String::from("Jack");
 
-        let jack = Box::new(Dog { name: &name }) as Box<dyn Terrier>;
+        let _jack = Box::new(Dog { name: &name }) as Box<dyn Terrier>;
     }
-    
+
     #[test]
     fn placeholder_types() {
         let counter = Counter::new();
-        
+
         let result: u32 = counter.sum();
-        
+
         assert_eq!((11 * 10) / 2, result);
+    }
+
+    #[test]
+    fn type_alias() {
+        type Magic = i32;
+
+        let x: Magic = 42;
+        let y: i32 = 8;
+
+        assert_eq!(42 + 8, x + y);
     }
 }
 
@@ -117,15 +127,15 @@ impl Counter {
 }
 
 impl Iterator for Counter {
-     type Item = u32;
-     
-     fn next(&mut self) -> Option<Self::Item> {
-         match self.count {
-             0 ... 9 => {
-                 self.count += 1;
-                 Some(self.count)
-             },
-             _ => None
-         }
-     }
+    type Item = u32;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.count {
+            0...9 => {
+                self.count += 1;
+                Some(self.count)
+            }
+            _ => None,
+        }
+    }
 }
