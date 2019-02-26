@@ -74,6 +74,51 @@ mod tests {
 
         assert_eq!(42 + 8, x + y);
     }
+
+    #[test]
+    fn do_it_twice_i32() {
+        fn add_one(x: i32) -> i32 {
+            x + 1
+        }
+
+        let eight_plus2 = do_twice(add_one, 8);
+
+        assert_eq!(10, eight_plus2);
+    }
+
+    #[test]
+    fn do_it_twice_string() {
+        fn bang(s: String) -> String {
+            format!("{}!", s)
+        }
+
+        let result = do_twice(bang, String::from("Hello"));
+
+        assert_eq!(String::from("Hello!!"), result);
+    }
+
+    #[test]
+    fn closure_vs_fully_qualified_syntax() {
+        let list_of_numbers = vec![1, 2, 3];
+
+        let closure: Vec<String> = list_of_numbers.iter().map(|i| i.to_string()).collect();
+
+        let qualified: Vec<String> = list_of_numbers.iter().map(ToString::to_string).collect();
+
+        assert_eq!(closure, qualified);
+    }
+
+    #[test]
+    fn return_closure() {
+        fn add_one() -> Box<Fn(i32) -> i32> {
+            Box::new(|x| x + 1)
+        }
+
+        let adder = add_one();
+        let question = adder(42);
+
+        assert_eq!(43, question);
+    }
 }
 
 use std::slice;
@@ -138,4 +183,8 @@ impl Iterator for Counter {
             _ => None,
         }
     }
+}
+
+fn do_twice<T>(f: fn(T) -> T, arg: T) -> T {
+    f(f(arg))
 }
