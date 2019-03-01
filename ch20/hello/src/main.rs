@@ -10,7 +10,9 @@ fn main() {
     for stream in listener.incoming() {
         let stream = stream.unwrap();
 
-        handle_connection(stream);
+        thread::spawn(|| {
+            handle_connection(stream);
+        });
     }
 }
 
@@ -20,7 +22,7 @@ fn handle_connection(mut stream: TcpStream) {
     println!("Request: {}", String::from_utf8_lossy(&buffer[..]));
 
     let get = b"GET / HTTP/1.1\r\n";
-    let sleep = b"GET /sleep HTTP/1.1\r\n"; 
+    let sleep = b"GET /sleep HTTP/1.1\r\n";
 
     let (status, file_name) = if (buffer.starts_with(get)) {
         ("HTTP/1.1 200 OK\r\n\r\n", "hello.html")
@@ -30,7 +32,7 @@ fn handle_connection(mut stream: TcpStream) {
     } else {
         ("HTTP/1.1 404 NOT FOUND\r\n\r\n", "404.html")
     };
-    
+
     let mut file = File::open(file_name).unwrap();
     let mut contents = String::new();
     file.read_to_string(&mut contents).unwrap();
